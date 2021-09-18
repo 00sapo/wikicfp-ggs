@@ -1,1 +1,3 @@
-zip -r -FS ../wikicfp.zip * --exclude '*.git*' --exclude 'tags' --exclude 'pack.sh'
+cd src
+zip -r -FS ../wikicfp.zip src/* --exclude 'tags'
+cd ..

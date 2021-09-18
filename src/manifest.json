@@ -4,7 +4,8 @@
   "version": "0.1",
   "description": "Adds GGS scores to WikiCFP pages",
   "web_accessible_resources": [
-    "GII-GRIN-SCIE-Conference-Rating-22-giu-2021.csv"
+    "GII-GRIN-SCIE-Conference-Rating-22-giu-2021.csv",
+    "predatories.txt"
   ],
   "content_scripts": [
     {
