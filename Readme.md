@@ -1,6 +1,7 @@
 # WikiCFP - GGS
 
 This is a borwser extension that adds GGS rankings to WikiCFP pages.
+It should work for all major browsers, but onfly Firefox is tested.
 
 GGS rankings are rankings assinged to computer science conferences by a
 spanish-italian academic consortium based on rankings from various sources.
@@ -9,7 +10,7 @@ Rankings are between 7 (best) and 0 (worst). Note that 0 is also used for
 conferences that are not top and have too few data for a fair rating. More
 details are available on the [GGS website](https://scie.lcc.uma.es:8443/).
 
-Moreover, The extensions add links to Goggle Scholar and ScimagoJR queries.
+Moreover, the extension adds links to Goggle Scholar and ScimagoJR queries.
 
 When enabled, the extension add two columns to the conference list. If the
 `GSS` column is `n/a`, it means that:
