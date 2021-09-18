@@ -38,7 +38,7 @@ var STOPWORDS =
 
     var GRIN_URL = "GII-GRIN-SCIE-Conference-Rating-22-giu-2021.csv"
 
-var API = browser || chrome
+var API = chrome || browser
 
 console.log("WikiCFP - GGS is active")
 

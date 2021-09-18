@@ -1,7 +1,8 @@
 # WikiCFP - GGS
 
 This is a borwser extension that adds GGS rankings to WikiCFP pages.
-It should work for all major browsers, but onfly Firefox is tested.
+It should work for all major browsers, but only Firefox is tested and
+maintained. You can still load this extension via developer option in chrome.
 
 GGS rankings are rankings assinged to computer science conferences by a
 spanish-italian academic consortium based on rankings from various sources.
