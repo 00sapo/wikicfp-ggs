@@ -2,15 +2,24 @@
   "manifest_version": 2,
   "name": "GGS for WikiCFP",
   "version": "0.1",
-
   "description": "Adds GGS scores to WikiCFP pages",
-  "web_accessible_resources": ["GII-GRIN-SCIE-Conference-Rating-22-giu-2021.csv"],
-
+  "web_accessible_resources": [
+    "GII-GRIN-SCIE-Conference-Rating-22-giu-2021.csv"
+  ],
   "content_scripts": [
     {
-      "matches": ["*://*.wikicfp.com/*", "*://wikicfp.com/*"],
-      "js": ["wikicfp_ggs.js"]
+      "matches": [
+        "*://*.wikicfp.com/*",
+        "*://wikicfp.com/*"
+      ],
+      "js": [
+        "wikicfp_ggs.js"
+      ]
     }
-  ]
-
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "wikicfpggs@federicosimonetta.eu.org"
+    }
+  }
 }
