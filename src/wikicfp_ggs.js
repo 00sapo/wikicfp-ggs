@@ -256,8 +256,7 @@ function check_predatory_website(dom, predatories) {
   let predatory = false;
   let unknown = false;
   try {
-    website = new URL(dom.getElementsByTagName("center")[0]
-                          .getElementsByTagName("tr")[5]
+    website = new URL(dom.getElementsByTagName("tr")[8]
                           .getElementsByTagName("a")[0]
                           .href);
     predatory = predatories.includes(website.host.replace("^www\.", ""));
