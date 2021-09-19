@@ -8,6 +8,15 @@ var styles = `
     .unknownpredatory, .unknownpredatory a {
         color: #0000004f;
     }
+
+    .warning {
+        color: red;
+        font-size: xxx-large;
+    }
+
+    .marker {
+        font-size: x-large;
+    }
 `
 
 var styleSheet = document.createElement("style");
@@ -227,7 +236,8 @@ function search_ggs(ggs_data, name, acronym) {
   name_found = name_score === "err" ? false : name_found;
   // the following has this idea: if both acronym and name were found but with
   // two different scores, then it's likely that the acronym was wrong
-  // (because of `-` chars and multiple conferences with the same acronym e.g. ICMC)
+  // (because of `-` chars and multiple conferences with the same acronym e.g.
+  // ICMC)
   if (!name_found && !acrn_found) {
     return "n/a";
   } else if (name_found && !acrn_found) {
@@ -240,6 +250,22 @@ function search_ggs(ggs_data, name, acronym) {
     else
       return name_score;
   }
+}
+
+function check_predatory_website(dom, predatories) {
+  let predatory = false;
+  let unknown = false;
+  try {
+    website = new URL(dom.getElementsByTagName("center")[0]
+                          .getElementsByTagName("tr")[5]
+                          .getElementsByTagName("a")[0]
+                          .href);
+    predatory = predatories.includes(website.host.replace("^www\.", ""));
+  } catch (e) {
+    console.log(e);
+    unknown = true;
+  }
+  return [ predatory, unknown ];
 }
 
 function check_predatory(predatories, rows, i) {
@@ -257,16 +283,7 @@ function check_predatory(predatories, rows, i) {
       if (this.status === 200) {
         // check website
         var html = dom_parser.parseFromString(this.responseText, 'text/html');
-        try {
-          website = new URL(html.getElementsByTagName("center")[0]
-                                .getElementsByTagName("tr")[5]
-                                .getElementsByTagName("a")[0]
-                                .href);
-          predatory = predatories.includes(website.host.replace("^www\.", ""));
-        } catch (e) {
-          console.log(e);
-          unknown = true;
-        }
+        [predatory, unknown] = check_predatory_website(html, predatories);
       } else {
         //  mark predatory
         unknown = true;
@@ -300,32 +317,19 @@ function clean_acronym(str) {
   return acr;
 }
 
-function main() {
-  var tables = document.getElementsByTagName("table");
-  // find the correct table (it is just a table, with no identifier)
-  if (tables.length === 9) {
-    // my-list page
-    var table_idx = 5;
-  } else if (tables.length === 12) {
-    // output of a category
-    var table_idx = 8;
-  } else if (tables.length === 6) {
-    // output of a search
-    var table_idx = 3;
-  } else if (tables.length === 15) {
-    // homepage
-    var table_idx = 12;
-  } else {
-    // otherwise do nothing
-    return;
-  }
-  var rows = tables[table_idx].getElementsByTagName("tr");
+function check_ggs(name, acronym, ggs_data) {
+  let conference_name = clean_name(name);
+  let conference_acrn = clean_acronym(acronym);
+  let ggs_score = search_ggs(ggs_data, conference_name, conference_acrn)
+  let sjr = '<a href="https://www.scimagojr.com/journalsearch.php?q=' +
+            conference_name.replace(/ /, '+') + '" target="_blank">SJR</a>';
+  let scholar =
+      '<a href="https://scholar.google.it/citations?hl=it&view_op=search_venues&vq=' +
+      conference_name.replace(/ /, '+') + '" target="_blank">Scholar</a>';
+  return [ ggs_score, sjr, scholar ];
+}
 
-  // load ggs data (conference name in the first column, scoring in the 4th
-  // column
-  var ggs_data = parse_csv(load_data(GGS_URL));
-  var predatories = load_data(PREDATORY_URL).split("\n");
-
+function parse_table(rows, ggs_data, predatories) {
   // iterate the rows
   for (let i = 0; i < rows.length; i++) {
     let row = rows[i];
@@ -340,18 +344,66 @@ function main() {
       check_predatory(predatories, rows, i);
 
       // in the meantime, go on as if it was not predatory
-      let conference_name = clean_name(row.children[1].innerText);
-      let conference_acrn = clean_acronym(row.children[0].innerText);
-      let ggs_score = search_ggs(ggs_data, conference_name, conference_acrn)
+      [ggs_score, sjr, scholar] =
+          check_ggs(row.children[1].innerText, row.children[0].innerText, ggs_data);
       row.innerHTML += '<td>' + ggs_score + '</td>';
-      let sjr = '<a href="https://www.scimagojr.com/journalsearch.php?q=' +
-                conference_name.replace(/ /, '+') + '" target="_blank">SJR</a>';
-      let scholar =
-          '<a href="https://scholar.google.it/citations?hl=it&view_op=search_venues&vq=' +
-          conference_name.replace(/ /, '+') + '" target="_blank">Scholar</a>';
       row.innerHTML += '<td>' + sjr + ', ' + scholar + '</td>';
     }
   }
+}
+
+function parse_event(ggs_data, predatories) {
+  // check predatory
+  var table =
+      document.getElementsByTagName("table")[7].getElementsByTagName("tr")[0];
+  [predatory, unknown] = check_predatory_website(document, predatories);
+  if (predatory) {
+    // add marker
+      table.innerHTML += "<td class='warning'>PREDATORY!!</td>";
+    return;
+  }
+
+  // search ggs scores
+  description =
+      document.querySelector('meta[name="description"]').content.split(" : ");
+  [ggs_score, sjr, scholar] = check_ggs(description[1], description[0], ggs_data);
+
+  // add marker
+  table.innerHTML +=
+      "<td class='marker'>GGS: " + ggs_score + ", " + sjr + ", " + scholar + "</td>";
+}
+
+function main() {
+  // load ggs data (conference name in the first column, scoring in the 4th
+  // column
+  var ggs_data = parse_csv(load_data(GGS_URL));
+  var predatories = load_data(PREDATORY_URL).split("\n");
+
+  // find the correct table (it is just a table, with no identifier)
+  var tables = document.getElementsByTagName("table");
+  var path = window.location.pathname;
+  if (path === "/cfp/servlet/event.showlist") {
+    // `my-list` page
+    var table_idx = 8;
+  } else if (path === "/cfp/call") {
+    // output of a category
+    var table_idx = 5;
+  } else if (path === "/cfp/servlet/tool.search" || path === "/cfp/allcfp") {
+    // output of a search or `all-cfp` page
+    var table_idx = 3;
+  } else if (path === "/cfp/home") {
+    // homepage
+    var table_idx = 12;
+  } else if (path === "/cfp/servlet/event.showcfp") {
+    // event page
+    parse_event(ggs_data, predatories);
+    return;
+  } else {
+    // otherwise do nothing
+    return;
+  }
+  var rows = tables[table_idx].getElementsByTagName("tr");
+  parse_table(rows, ggs_data, predatories);
 }
 
 main();
