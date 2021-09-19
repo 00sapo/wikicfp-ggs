@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
   "name": "GGS for WikiCFP",
-  "version": "0.2",
-  "description": "Adds GGS scores to WikiCFP pages",
+  "version": "1.0",
+  "description": "Safely search academic conferences on WikiCFP",
   "web_accessible_resources": [
     "GII-GRIN-SCIE-Conference-Rating-22-giu-2021.csv",
     "predatories.txt"
