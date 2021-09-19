@@ -1,3 +1,17 @@
+// adding custom styles
+var styles = `
+    .predatory, .predatory a {
+        text-decoration-line: line-through; 
+        color: #0000004f;
+    }
+`
+
+var styleSheet = document.createElement("style")
+styleSheet.type = "text/css"
+styleSheet.innerText = styles
+document.head.appendChild(styleSheet)
+
+// defining custom variables
 var STOPWORDS =
     [
       'I',          'ME',      'MY',      'MYSELF',
@@ -35,8 +49,7 @@ var STOPWORDS =
       'COMPENDEX',  'SCOPUS',  'JOURNAL', 'INTERNATIONAL',
       'CONFERENCE'
     ]
-
-    var GGS_URL = "GII-GRIN-SCIE-Conference-Rating-22-giu-2021.csv"
+var GGS_URL = "GII-GRIN-SCIE-Conference-Rating-22-giu-2021.csv"
 var PREDATORY_URL = "predatories.txt"
 var API = chrome || browser
 
@@ -203,7 +216,7 @@ function search_ggs(ggs_data, query) {
   return matches[Math.min(...Object.keys(matches))];
 }
 
-function check_predatory(predatories, row) {
+function check_predatory(predatories, rows, i) {
 
   const req = new XMLHttpRequest();
   // To parse the remote document directly as a DOM document
@@ -221,18 +234,20 @@ function check_predatory(predatories, row) {
                               .getElementsByTagName("tr")[5]
                               .getElementsByTagName("a")[0]
                               .href)
-        predatory = predatories.includes(website.host);
+        predatory = predatories.includes(website.host.replace("^www\.", ""));
       } else {
         //  mark predatory
         predatory = true;
       }
       if (predatory) {
-        row.style.textDecorationLine = "line-through";
+        rows[i].classList.add("predatory");
+        rows[i+1].classList.add("predatory");
+        rows[i+1].style.cssText = "text-decoration-line: line-through; color: #0000004f;'";
       }
     }
   };
 
-  var url = row.children[0].getElementsByTagName("a")[0].href;
+  var url = rows[i].children[0].getElementsByTagName("a")[0].href;
   req.open('GET', url, true);
   req.send(null);
 }
@@ -274,7 +289,7 @@ function main() {
     } else if (i % 2 === 1) {
       // only for odd rows
       // the following works asynchronously...
-      check_predatory(predatories, row);
+      check_predatory(predatories, rows, i);
 
       // in the meantime, go on as if it was not predatory
       let conference_name = clean_name(row.children[1].innerHTML);

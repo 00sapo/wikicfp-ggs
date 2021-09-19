@@ -18,6 +18,8 @@ def parse(url):
             print("skipping", predatory)
             continue
         domain = urlparse(website).netloc
+        if domain.startswith("www."):
+            domain = domain[4:]
         domains.append(domain)
     return domains
 
