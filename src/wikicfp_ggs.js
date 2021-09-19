@@ -4,56 +4,60 @@ var styles = `
         text-decoration-line: line-through; 
         color: #0000004f;
     }
+
+    .unknownpredatory, .unknownpredatory a {
+        color: #0000004f;
+    }
 `
 
-var styleSheet = document.createElement("style")
-styleSheet.type = "text/css"
-styleSheet.innerText = styles
-document.head.appendChild(styleSheet)
+var styleSheet = document.createElement("style");
+styleSheet.type = "text/css";
+styleSheet.innerText = styles;
+document.head.appendChild(styleSheet);
 
 // defining custom variables
-var STOPWORDS =
-    [
-      'I',          'ME',      'MY',      'MYSELF',
-      'WE',         'OUR',     'OURS',    'OURSELVES',
-      'YOU',        'YOUR',    'YOURS',   'YOURSELF',
-      'YOURSELVES', 'HE',      'HIM',     'HIS',
-      'HIMSELF',    'SHE',     'HER',     'HERS',
-      'HERSELF',    'IT',      'ITS',     'ITSELF',
-      'THEY',       'THEM',    'THEIR',   'THEIRS',
-      'THEMSELVES', 'WHAT',    'WHICH',   'WHO',
-      'WHOM',       'THIS',    'THAT',    'THESE',
-      'THOSE',      'AM',      'IS',      'ARE',
-      'WAS',        'WERE',    'BE',      'BEEN',
-      'BEING',      'HAVE',    'HAS',     'HAD',
-      'HAVING',     'DO',      'DOES',    'DID',
-      'DOING',      'A',       'AN',      'THE',
-      'AND',        'BUT',     'IF',      'OR',
-      'BECAUSE',    'AS',      'UNTIL',   'WHILE',
-      'OF',         'AT',      'BY',      'FOR',
-      'WITH',       'ABOUT',   'AGAINST', 'BETWEEN',
-      'INTO',       'THROUGH', 'DURING',  'BEFORE',
-      'AFTER',      'ABOVE',   'BELOW',   'TO',
-      'FROM',       'UP',      'DOWN',    'IN',
-      'OUT',        'ON',      'OFF',     'OVER',
-      'UNDER',      'AGAIN',   'FURTHER', 'THEN',
-      'ONCE',       'HERE',    'THERE',   'WHEN',
-      'WHERE',      'WHY',     'HOW',     'ALL',
-      'ANY',        'BOTH',    'EACH',    'FEW',
-      'MORE',       'MOST',    'OTHER',   'SOME',
-      'SUCH',       'NO',      'NOR',     'NOT',
-      'ONLY',       'OWN',     'SAME',    'SO',
-      'THAN',       'TOO',     'VERY',    'S',
-      'T',          'CAN',     'WILL',    'JUST',
-      'DON',        'SHOULD',  'NOW',     'EI',
-      'COMPENDEX',  'SCOPUS',  'JOURNAL', 'INTERNATIONAL',
-      'CONFERENCE'
-    ]
-var GGS_URL = "GII-GRIN-SCIE-Conference-Rating-22-giu-2021.csv"
-var PREDATORY_URL = "predatories.txt"
-var API = chrome || browser
+var STOPWORDS = [
+  'I',          'ME',      'MY',      'MYSELF',
+  'WE',         'OUR',     'OURS',    'OURSELVES',
+  'YOU',        'YOUR',    'YOURS',   'YOURSELF',
+  'YOURSELVES', 'HE',      'HIM',     'HIS',
+  'HIMSELF',    'SHE',     'HER',     'HERS',
+  'HERSELF',    'IT',      'ITS',     'ITSELF',
+  'THEY',       'THEM',    'THEIR',   'THEIRS',
+  'THEMSELVES', 'WHAT',    'WHICH',   'WHO',
+  'WHOM',       'THIS',    'THAT',    'THESE',
+  'THOSE',      'AM',      'IS',      'ARE',
+  'WAS',        'WERE',    'BE',      'BEEN',
+  'BEING',      'HAVE',    'HAS',     'HAD',
+  'HAVING',     'DO',      'DOES',    'DID',
+  'DOING',      'A',       'AN',      'THE',
+  'AND',        'BUT',     'IF',      'OR',
+  'BECAUSE',    'AS',      'UNTIL',   'WHILE',
+  'OF',         'AT',      'BY',      'FOR',
+  'WITH',       'ABOUT',   'AGAINST', 'BETWEEN',
+  'INTO',       'THROUGH', 'DURING',  'BEFORE',
+  'AFTER',      'ABOVE',   'BELOW',   'TO',
+  'FROM',       'UP',      'DOWN',    'IN',
+  'OUT',        'ON',      'OFF',     'OVER',
+  'UNDER',      'AGAIN',   'FURTHER', 'THEN',
+  'ONCE',       'HERE',    'THERE',   'WHEN',
+  'WHERE',      'WHY',     'HOW',     'ALL',
+  'ANY',        'BOTH',    'EACH',    'FEW',
+  'MORE',       'MOST',    'OTHER',   'SOME',
+  'SUCH',       'NO',      'NOR',     'NOT',
+  'ONLY',       'OWN',     'SAME',    'SO',
+  'THAN',       'TOO',     'VERY',    'S',
+  'T',          'CAN',     'WILL',    'JUST',
+  'DON',        'SHOULD',  'NOW',     'EI',
+  'COMPENDEX',  'SCOPUS',  'JOURNAL', 'INTERNATIONAL',
+  'CONFERENCE', 'AMP'
+];
 
-console.log("WikiCFP - GGS is active")
+var GGS_URL = "GII-GRIN-SCIE-Conference-Rating-22-giu-2021.csv";
+var PREDATORY_URL = "predatories.txt";
+var API = chrome || browser;
+
+console.log("WikiCFP - GGS is active");
 
 function remove_stopwords(str) {
   res = [];
@@ -190,30 +194,52 @@ function class_to_score(cl) {
     return "err";
 }
 
-function search_ggs(ggs_data, query) {
-  let regex = new RegExp(".*" + query.replace(/ /g, ".*") + ".*");
-  var words = query.split(" ").length;
-  var matches = new Object();
-  var found = false;
+function search_ggs(ggs_data, name, acronym) {
+  let regex = new RegExp(".*" + name.replace(/ /g, ".*") + ".*");
+  var words = name.split(" ").length;
+  var name_matches = new Object();
+  var acrn_score = "n/a";
+  var name_found = false;
+  var acrn_found = false;
   for (row of ggs_data) {
-    let target_conf = row[1];
-    if (target_conf.match(regex)) {
+    let target_conf_name = row[1];
+    let target_conf_acrn = row[2];
+    if (target_conf_name.match(regex)) {
       // assigning a score to the match
-      let match = clean_name(target_conf.toLowerCase()).split(" ").length;
+      let match = clean_name(target_conf_name.toLowerCase()).split(" ").length;
       let match_score = Math.abs(match - words);
-      if (matches[match_score] !== undefined) {
+      if (name_matches[match_score] !== undefined) {
         // a similar matching is already present
-        matches[match_score] = "err";
+        name_matches[match_score] = "err";
       } else {
-        matches[match_score] = class_to_score(row[4]);
+        name_matches[match_score] = class_to_score(row[4]);
       }
-      found = true;
+      name_found = true;
+    }
+    if (target_conf_acrn === acronym) {
+      acrn_score = class_to_score(row[4]);
+      acrn_found = true;
     }
   }
-  if (!found)
-    return "n/a";
+
   // find best matching
-  return matches[Math.min(...Object.keys(matches))];
+  const name_score = name_matches[Math.min(...Object.keys(name_matches))];
+  name_found = name_score === "err" ? false : name_found;
+  // the following has this idea: if both acronym and name were found but with
+  // two different scores, then it's likely that the acronym was wrong
+  // (because of `-` chars and multiple conferences with the same acronym e.g. ICMC)
+  if (!name_found && !acrn_found) {
+    return "n/a";
+  } else if (name_found && !acrn_found) {
+    return name_score;
+  } else if (!name_found && acrn_found) {
+    return acrn_score;
+  } else if (name_found && acrn_found) {
+    if (acrn_score === name_score)
+      return acrn_score;
+    else
+      return name_score;
+  }
 }
 
 function check_predatory(predatories, rows, i) {
@@ -227,22 +253,30 @@ function check_predatory(predatories, rows, i) {
   req.onreadystatechange = function(event) {
     if (this.readyState === XMLHttpRequest.DONE) {
       let predatory = false;
+      let unknown = false;
       if (this.status === 200) {
         // check website
         var html = dom_parser.parseFromString(this.responseText, 'text/html');
-        website = new URL(html.getElementsByTagName("center")[0]
-                              .getElementsByTagName("tr")[5]
-                              .getElementsByTagName("a")[0]
-                              .href)
-        predatory = predatories.includes(website.host.replace("^www\.", ""));
+        try {
+          website = new URL(html.getElementsByTagName("center")[0]
+                                .getElementsByTagName("tr")[5]
+                                .getElementsByTagName("a")[0]
+                                .href);
+          predatory = predatories.includes(website.host.replace("^www\.", ""));
+        } catch (e) {
+          console.log(e);
+          unknown = true;
+        }
       } else {
         //  mark predatory
-        predatory = true;
+        unknown = true;
       }
       if (predatory) {
         rows[i].classList.add("predatory");
-        rows[i+1].classList.add("predatory");
-        rows[i+1].style.cssText = "text-decoration-line: line-through; color: #0000004f;'";
+        rows[i + 1].classList.add("predatory");
+      } else if (unknown) {
+        rows[i].classList.add("unknownpredatory");
+        rows[i + 1].classList.add("unknownpredatory");
       }
     }
   };
@@ -250,6 +284,20 @@ function check_predatory(predatories, rows, i) {
   var url = rows[i].children[0].getElementsByTagName("a")[0].href;
   req.open('GET', url, true);
   req.send(null);
+}
+
+function clean_acronym(str) {
+  // split string
+  const splits = str.split(/ |--/);
+  var acr = "";
+  // take the first all-uppercase split different from IEEE and ACM
+  for (s of splits) {
+    if (s !== "IEEE" && s !== "ACM" && s.match(/[A-Z0-9]+/g)) {
+      acr = s;
+      break;
+    }
+  }
+  return acr;
 }
 
 function main() {
@@ -292,8 +340,9 @@ function main() {
       check_predatory(predatories, rows, i);
 
       // in the meantime, go on as if it was not predatory
-      let conference_name = clean_name(row.children[1].innerHTML);
-      let ggs_score = search_ggs(ggs_data, conference_name)
+      let conference_name = clean_name(row.children[1].innerText);
+      let conference_acrn = clean_acronym(row.children[0].innerText);
+      let ggs_score = search_ggs(ggs_data, conference_name, conference_acrn)
       row.innerHTML += '<td>' + ggs_score + '</td>';
       let sjr = '<a href="https://www.scimagojr.com/journalsearch.php?q=' +
                 conference_name.replace(/ /, '+') + '" target="_blank">SJR</a>';
