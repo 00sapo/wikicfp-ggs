@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "GGS for WikiCFP",
-  "version": "0.1",
+  "version": "0.2",
   "description": "Adds GGS scores to WikiCFP pages",
   "web_accessible_resources": [
     "GII-GRIN-SCIE-Conference-Rating-22-giu-2021.csv",
