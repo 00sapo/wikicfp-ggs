@@ -23,6 +23,7 @@ def parse(url):
 
 domains = parse("https://beallslist.net/standalone-journals/")
 domains += parse("https://beallslist.net")
+domains.append("www.mdpi.com")
 domains = set(domains)
 
 

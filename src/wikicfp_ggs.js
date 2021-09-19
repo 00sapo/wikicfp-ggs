@@ -36,8 +36,8 @@ var STOPWORDS =
       'CONFERENCE'
     ]
 
-    var GRIN_URL = "GII-GRIN-SCIE-Conference-Rating-22-giu-2021.csv"
-
+    var GGS_URL = "GII-GRIN-SCIE-Conference-Rating-22-giu-2021.csv"
+var PREDATORY_URL = "predatories.txt"
 var API = chrome || browser
 
 console.log("WikiCFP - GGS is active")
@@ -68,8 +68,8 @@ function clean_name(str) {
   return str.trim();
 }
 
-function load_data() {
-  var localUrl = API.extension.getURL(GRIN_URL);
+function load_data(url) {
+  var localUrl = API.extension.getURL(url);
 
   const req = new XMLHttpRequest();
   // To parse the remote document directly as a DOM document
@@ -203,6 +203,40 @@ function search_ggs(ggs_data, query) {
   return matches[Math.min(...Object.keys(matches))];
 }
 
+function check_predatory(predatories, row) {
+
+  const req = new XMLHttpRequest();
+  // To parse the remote document directly as a DOM document
+  // req.responseType = "document";
+
+  var out = "";
+  var dom_parser = new DOMParser();
+  req.onreadystatechange = function(event) {
+    if (this.readyState === XMLHttpRequest.DONE) {
+      let predatory = false;
+      if (this.status === 200) {
+        // check website
+        var html = dom_parser.parseFromString(this.responseText, 'text/html');
+        website = new URL(html.getElementsByTagName("center")[0]
+                              .getElementsByTagName("tr")[5]
+                              .getElementsByTagName("a")[0]
+                              .href)
+        predatory = predatories.includes(website.host);
+      } else {
+        //  mark predatory
+        predatory = true;
+      }
+      if (predatory) {
+        row.style.textDecorationLine = "line-through";
+      }
+    }
+  };
+
+  var url = row.children[0].getElementsByTagName("a")[0].href;
+  req.open('GET', url, true);
+  req.send(null);
+}
+
 function main() {
   var tables = document.getElementsByTagName("table");
   // find the correct table (it is just a table, with no identifier)
@@ -226,24 +260,31 @@ function main() {
 
   // load ggs data (conference name in the first column, scoring in the 4th
   // column
-  var ggs_data = parse_csv(load_data())
+  var ggs_data = parse_csv(load_data(GGS_URL));
+  var predatories = load_data(PREDATORY_URL).split("\n");
 
   // iterate the rows
   for (let i = 0; i < rows.length; i++) {
     let row = rows[i];
     if (i === 0) {
       // heading of the table
-      row.innerHTML += '<td><a href="https://scie.lcc.uma.es:8443/" target="_blank">GGS</a></td>';
+      row.innerHTML +=
+          '<td><a href="https://scie.lcc.uma.es:8443/" target="_blank">GGS</a></td>';
       row.innerHTML += '<td>Others</td>';
     } else if (i % 2 === 1) {
       // only for odd rows
+      // the following works asynchronously...
+      check_predatory(predatories, row);
+
+      // in the meantime, go on as if it was not predatory
       let conference_name = clean_name(row.children[1].innerHTML);
       let ggs_score = search_ggs(ggs_data, conference_name)
       row.innerHTML += '<td>' + ggs_score + '</td>';
       let sjr = '<a href="https://www.scimagojr.com/journalsearch.php?q=' +
                 conference_name.replace(/ /, '+') + '" target="_blank">SJR</a>';
-      let scholar = '<a href="https://scholar.google.it/citations?hl=it&view_op=search_venues&vq=' +
-                conference_name.replace(/ /, '+') + '" target="_blank">Scholar</a>';
+      let scholar =
+          '<a href="https://scholar.google.it/citations?hl=it&view_op=search_venues&vq=' +
+          conference_name.replace(/ /, '+') + '" target="_blank">Scholar</a>';
       row.innerHTML += '<td>' + sjr + ', ' + scholar + '</td>';
     }
   }
