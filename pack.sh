@@ -1,3 +1,3 @@
 cd src
-zip -r -FS ../wikicfp.zip src/* --exclude 'tags'
+zip -r -FS ../wikicfp.zip * --exclude 'tags'
 cd ..
