@@ -2,11 +2,15 @@
 
 #### Safely search Computer Science/Engineering conferences by deadline.
 
+[] mark predatory conferences and journals
+[] add GGS score
+[] add links to ScimagoJR and Google Scholar
+
 This is a browser extension that adds GGS rankings to WikiCFP pages.  It should
 work for all major browsers, but only Firefox and Chromium are tested and
 maintained. However, only the Firefox web store will distribute the addon for
 now. If anyone having a google web store account would like to distribute this
-extension, he's welcome. You can still load this extension via developer option
+extension, it's welcome. You can still load this extension via developer option
 in chrome.
 
 The extension adds one column with the conference rankings, one column with 
