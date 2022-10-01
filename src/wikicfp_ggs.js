@@ -336,7 +336,8 @@ function check_predatory(predatories, rows, i) {
   };
 
   var url = rows[i].children[0].getElementsByTagName("a")[0].href;
-  req.open('GET', url, true);
+  // true is for asynchronous, false is for synchronous
+  req.open('GET', url, false);
   req.send(null);
 }
 
@@ -406,21 +407,27 @@ function parse_event(ggs_data, predatories) {
   // check predatory
   var table =
     document.getElementsByTagName("table")[7].getElementsByTagName("tr")[0];
-  [predatory, unknown] = check_predatory_website(document, predatories);
+  let [predatory, unknown] = check_predatory_website(document, predatories);
   if (predatory) {
     // add marker
-    table.innerHTML += "<td class='warning'>PREDATORY!!</td>";
+    table.innerHTML += "<td class='warning'>THIS IS LIKELY A PREDATORY CONFERENCE!</td>";
     return;
   }
 
   // search ggs scores
-  description =
+  let description =
     document.querySelector('meta[name="description"]').content.split(" : ");
   [ggs_score, sjr, scholar] = check_ggs(description[1], description[0], ggs_data);
 
   // add marker
   table.innerHTML +=
     "<td class='marker'>GGS: " + ggs_score + ", " + sjr + ", " + scholar + "</td>";
+
+  if (unknown) {
+    // add marker
+    table.innerHTML += "<td class='warning'>WE COULDN'T CHECK IF THIS IS A PREDATORY CONFERENCE!</td>";
+    return;
+  }
 }
 
 function main() {
