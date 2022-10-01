@@ -1,8 +1,8 @@
 # WikiCFP - GGS
 
-#### Safely search Computer Science/Engineering conferences by deadline.
+#### Safely search Computer Science/Engineering conferences by deadline
 
-### Features
+## 1. Features
 
 * mark predatory conferences and journals
 * add GGS score
@@ -18,36 +18,54 @@ extension, it's welcome. You can still load this extension via developer option
 in chrome.
 
 The extension adds one column with the conference rankings, one column with 
-links to Goggle Scholar and ScimagoJR queries for each cfp and a drop-line over
+links to Goggle Scholar and ScimagoJR queries for each call and a drop-line over
 predatory call for papers.
 
 Ranking used is GGS. It is assigned to computer science conferences by a
 spanish-italian academic consortium and is based on rankings from 3 different
-sources.Rankings are between 7 (best) and 0 (worst). Note that 0 is also used for
+sources. Rankings are between 7 (best) and 0 (worst). Note that 0 is also used for
 conferences that are not top and have too few data for a fair rating. More
 details are available on the [GGS website](https://scie.lcc.uma.es:8443/).
 
  This tool also helps avoiding predatory conferences by using the list of
  publisher and journal websites available at https://beallslist.net .
 
-### `n/a`
+ MDPI is not considered predatory anymore, but you should be careful and trust
+ the organizers.
+
+## 2. Usage
+
+### 2.1. `n/a`
 If the `GSS` column is `n/a`, it means that:
 1. the cfp is for a journal
-2. the conference is very bad
-3. the conference was not matched by our algorithm
+2. the conference is very bad (not available in GGS)
+3. the conference was not matched by my algorithm
 4. the conference is new
 
-### `err`
+### 2.2. `err`
 If the `GSS` column is `err`, it means that:
 1. the GGS score was malformed (no known cases)
 2. the algorithm has found more than one match for this conference
 
 In any of the above cases, I strongly suggest you to 
 1. check scholar, sjr and GGS rankings via the provided links (you can click
-   the `GGS` table header to go the GGS website)
+  the `GGS` table header to go the GGS website)
 2. if you do not find the conference/journal on these databases, only publish
-   if you really trust the organizers.
-3. avoid conferences marked as predatory (drop-line).
+  if you really trust the organizers.
+
+### 2.3. Drop lines
+
+Predatory conferences are marked with a drop-line.
+
+### 2.4. Integer values
+
+Rankings are between 7 (best) and 0 (worst). Note that 0 is also used for
+conferences that are not top and have too few data for a fair rating. More
+details are available on the [GGS website](https://scie.lcc.uma.es:8443/).
+
+Predatory conferences often mimic the name of famous conferences. For this
+reason, they may are associated to a GGS score, but if they are marked as
+predatory, you should avoid them.
 
 ## Credits
 
