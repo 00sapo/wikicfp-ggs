@@ -17,6 +17,38 @@ var styles = `
     .marker {
         font-size: x-large;
     }
+    #ggs-iframe {
+      position: absolute;
+      margin: auto;
+      width: 75%;
+      height: 75%;
+      z-index: 99;
+      background: white;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      visibility: hidden;
+      font-size: large;
+      text-align: center;
+    }
+    #ggs-iframe iframe {
+      height: 75%;
+      width: 100%;
+    }
+
+    #ggs-acronym {
+      text-name: brown;
+    }
+
+    #ggs-name {
+      text-name: brown;
+    }
+
+    #ggs-description {
+      height: 25%;
+      
+    }
 `
 
 var styleSheet = document.createElement("style");
@@ -26,43 +58,43 @@ document.head.appendChild(styleSheet);
 
 // defining custom variables
 var STOPWORDS = [
-  'I',          'ME',      'MY',      'MYSELF',
-  'WE',         'OUR',     'OURS',    'OURSELVES',
-  'YOU',        'YOUR',    'YOURS',   'YOURSELF',
-  'YOURSELVES', 'HE',      'HIM',     'HIS',
-  'HIMSELF',    'SHE',     'HER',     'HERS',
-  'HERSELF',    'IT',      'ITS',     'ITSELF',
-  'THEY',       'THEM',    'THEIR',   'THEIRS',
-  'THEMSELVES', 'WHAT',    'WHICH',   'WHO',
-  'WHOM',       'THIS',    'THAT',    'THESE',
-  'THOSE',      'AM',      'IS',      'ARE',
-  'WAS',        'WERE',    'BE',      'BEEN',
-  'BEING',      'HAVE',    'HAS',     'HAD',
-  'HAVING',     'DO',      'DOES',    'DID',
-  'DOING',      'A',       'AN',      'THE',
-  'AND',        'BUT',     'IF',      'OR',
-  'BECAUSE',    'AS',      'UNTIL',   'WHILE',
-  'OF',         'AT',      'BY',      'FOR',
-  'WITH',       'ABOUT',   'AGAINST', 'BETWEEN',
-  'INTO',       'THROUGH', 'DURING',  'BEFORE',
-  'AFTER',      'ABOVE',   'BELOW',   'TO',
-  'FROM',       'UP',      'DOWN',    'IN',
-  'OUT',        'ON',      'OFF',     'OVER',
-  'UNDER',      'AGAIN',   'FURTHER', 'THEN',
-  'ONCE',       'HERE',    'THERE',   'WHEN',
-  'WHERE',      'WHY',     'HOW',     'ALL',
-  'ANY',        'BOTH',    'EACH',    'FEW',
-  'MORE',       'MOST',    'OTHER',   'SOME',
-  'SUCH',       'NO',      'NOR',     'NOT',
-  'ONLY',       'OWN',     'SAME',    'SO',
-  'THAN',       'TOO',     'VERY',    'S',
-  'T',          'CAN',     'WILL',    'JUST',
-  'DON',        'SHOULD',  'NOW',     'EI',
-  'COMPENDEX',  'SCOPUS',  'JOURNAL', 'INTERNATIONAL',
+  'I', 'ME', 'MY', 'MYSELF',
+  'WE', 'OUR', 'OURS', 'OURSELVES',
+  'YOU', 'YOUR', 'YOURS', 'YOURSELF',
+  'YOURSELVES', 'HE', 'HIM', 'HIS',
+  'HIMSELF', 'SHE', 'HER', 'HERS',
+  'HERSELF', 'IT', 'ITS', 'ITSELF',
+  'THEY', 'THEM', 'THEIR', 'THEIRS',
+  'THEMSELVES', 'WHAT', 'WHICH', 'WHO',
+  'WHOM', 'THIS', 'THAT', 'THESE',
+  'THOSE', 'AM', 'IS', 'ARE',
+  'WAS', 'WERE', 'BE', 'BEEN',
+  'BEING', 'HAVE', 'HAS', 'HAD',
+  'HAVING', 'DO', 'DOES', 'DID',
+  'DOING', 'A', 'AN', 'THE',
+  'AND', 'BUT', 'IF', 'OR',
+  'BECAUSE', 'AS', 'UNTIL', 'WHILE',
+  'OF', 'AT', 'BY', 'FOR',
+  'WITH', 'ABOUT', 'AGAINST', 'BETWEEN',
+  'INTO', 'THROUGH', 'DURING', 'BEFORE',
+  'AFTER', 'ABOVE', 'BELOW', 'TO',
+  'FROM', 'UP', 'DOWN', 'IN',
+  'OUT', 'ON', 'OFF', 'OVER',
+  'UNDER', 'AGAIN', 'FURTHER', 'THEN',
+  'ONCE', 'HERE', 'THERE', 'WHEN',
+  'WHERE', 'WHY', 'HOW', 'ALL',
+  'ANY', 'BOTH', 'EACH', 'FEW',
+  'MORE', 'MOST', 'OTHER', 'SOME',
+  'SUCH', 'NO', 'NOR', 'NOT',
+  'ONLY', 'OWN', 'SAME', 'SO',
+  'THAN', 'TOO', 'VERY', 'S',
+  'T', 'CAN', 'WILL', 'JUST',
+  'DON', 'SHOULD', 'NOW', 'EI',
+  'COMPENDEX', 'SCOPUS', 'JOURNAL', 'INTERNATIONAL',
   'CONFERENCE', 'AMP'
 ];
 
-var GGS_URL = "GII-GRIN-SCIE-Conference-Rating-22-giu-2021.csv";
+var GGS_URL = "GII-GRIN-SCIE-Conference-Rating-24-ott-2021-9.17.09-Output.csv";
 var PREDATORY_URL = "predatories.txt";
 var API = chrome || browser;
 
@@ -128,8 +160,8 @@ function parse_csv(str) {
     var cc = str[c], nc = str[c + 1]; // Current character, next character
     arr[row] = arr[row] || [];        // Create a new row if necessary
     arr[row][col] =
-        arr[row][col] ||
-        ''; // Create a new column (start with empty string) if necessary
+      arr[row][col] ||
+      ''; // Create a new column (start with empty string) if necessary
 
     // If the current character is a quotation mark, and we're inside a
     // quoted field, and the next character is also a quotation mark,
@@ -210,7 +242,7 @@ function search_ggs(ggs_data, name, acronym) {
   var acrn_score = "n/a";
   var name_found = false;
   var acrn_found = false;
-  for (row of ggs_data) {
+  for (var row of ggs_data) {
     let target_conf_name = row[1];
     let target_conf_acrn = row[2];
     if (target_conf_name.match(regex)) {
@@ -225,7 +257,7 @@ function search_ggs(ggs_data, name, acronym) {
       }
       name_found = true;
     }
-    if (target_conf_acrn === acronym) {
+    if (target_conf_acrn.toUpperCase() === acronym) {
       acrn_score = class_to_score(row[4]);
       acrn_found = true;
     }
@@ -255,16 +287,23 @@ function search_ggs(ggs_data, name, acronym) {
 function check_predatory_website(dom, predatories) {
   let predatory = false;
   let unknown = false;
+  let url = ""
   try {
-    website = new URL(dom.getElementsByTagName("tr")[8]
-                          .getElementsByTagName("a")[0]
-                          .href);
-    predatory = predatories.includes(website.host.replace("^www\.", ""));
+    url = dom.getElementsByTagName("tr")[8].getElementsByTagName("a")[0].href
   } catch (e) {
-    console.log(e);
-    unknown = true;
+    console.log("Website not detected!")
+    unknown = true
   }
-  return [ predatory, unknown ];
+  if (url != "") {
+    try {
+      let website = new URL(url);
+      predatory = predatories.includes(website.host.replace("^www\.", ""));
+    } catch (e) {
+      console.log(e);
+      unknown = true;
+    }
+  }
+  return [predatory, unknown];
 }
 
 function check_predatory(predatories, rows, i) {
@@ -273,7 +312,6 @@ function check_predatory(predatories, rows, i) {
   // To parse the remote document directly as a DOM document
   // req.responseType = "document";
 
-  var out = "";
   var dom_parser = new DOMParser();
   req.onreadystatechange = function(event) {
     if (this.readyState === XMLHttpRequest.DONE) {
@@ -313,19 +351,32 @@ function clean_acronym(str) {
       break;
     }
   }
-  return acr;
+  return acr.toUpperCase();
 }
 
 function check_ggs(name, acronym, ggs_data) {
   let conference_name = clean_name(name);
   let conference_acrn = clean_acronym(acronym);
   let ggs_score = search_ggs(ggs_data, conference_name, conference_acrn)
+  let ggs = '<a href="#" onclick="toggle_ggs_iframe(\'' + conference_name + '\', \'' + conference_acrn + '\');">' + ggs_score + '</a>'
   let sjr = '<a href="https://www.scimagojr.com/journalsearch.php?q=' +
-            conference_name.replace(/ /, '+') + '" target="_blank">SJR</a>';
+    conference_name.replace(/ /, '+') + '" target="_blank">SJR</a>';
   let scholar =
-      '<a href="https://scholar.google.it/citations?hl=it&view_op=search_venues&vq=' +
-      conference_name.replace(/ /, '+') + '" target="_blank">Scholar</a>';
-  return [ ggs_score, sjr, scholar ];
+    '<a href="https://scholar.google.it/citations?hl=it&view_op=search_venues&vq=' +
+    conference_name.replace(/ /, '+') + '" target="_blank">Scholar</a>';
+  return [ggs, sjr, scholar];
+}
+
+
+function toggle_ggs_iframe(name, acronym) {
+  document.getElementById('ggs-name').innerHTML = name
+  document.getElementById('ggs-acronym').innerHTML = acronym
+
+  let style = document.getElementById("ggs-iframe").style
+  if (style.visibility === "hidden")
+    style.visibility = "visible";
+  else
+    style.visibility = "hidden";
 }
 
 function parse_table(rows, ggs_data, predatories) {
@@ -335,7 +386,7 @@ function parse_table(rows, ggs_data, predatories) {
     if (i === 0) {
       // heading of the table
       row.innerHTML +=
-          '<td><a href="https://scie.lcc.uma.es:8443/" target="_blank">GGS</a></td>';
+        '<td><a href="https://scie.lcc.uma.es:8443/" target="_blank">GGS</a></td>';
       row.innerHTML += '<td>Others</td>';
     } else if (i % 2 === 1) {
       // only for odd rows
@@ -344,7 +395,7 @@ function parse_table(rows, ggs_data, predatories) {
 
       // in the meantime, go on as if it was not predatory
       [ggs_score, sjr, scholar] =
-          check_ggs(row.children[1].innerText, row.children[0].innerText, ggs_data);
+        check_ggs(row.children[1].innerText, row.children[0].innerText, ggs_data);
       row.innerHTML += '<td>' + ggs_score + '</td>';
       row.innerHTML += '<td>' + sjr + ', ' + scholar + '</td>';
     }
@@ -354,22 +405,22 @@ function parse_table(rows, ggs_data, predatories) {
 function parse_event(ggs_data, predatories) {
   // check predatory
   var table =
-      document.getElementsByTagName("table")[7].getElementsByTagName("tr")[0];
+    document.getElementsByTagName("table")[7].getElementsByTagName("tr")[0];
   [predatory, unknown] = check_predatory_website(document, predatories);
   if (predatory) {
     // add marker
-      table.innerHTML += "<td class='warning'>PREDATORY!!</td>";
+    table.innerHTML += "<td class='warning'>PREDATORY!!</td>";
     return;
   }
 
   // search ggs scores
   description =
-      document.querySelector('meta[name="description"]').content.split(" : ");
+    document.querySelector('meta[name="description"]').content.split(" : ");
   [ggs_score, sjr, scholar] = check_ggs(description[1], description[0], ggs_data);
 
   // add marker
   table.innerHTML +=
-      "<td class='marker'>GGS: " + ggs_score + ", " + sjr + ", " + scholar + "</td>";
+    "<td class='marker'>GGS: " + ggs_score + ", " + sjr + ", " + scholar + "</td>";
 }
 
 function main() {
@@ -390,7 +441,7 @@ function main() {
   } else if (path === "/cfp/servlet/tool.search" || path === "/cfp/allcfp") {
     // output of a search or `all-cfp` page
     var table_idx = 3;
-  } else if (path === "/cfp/home") {
+  } else if (path === "/cfp/home" || path === "/cfp/") {
     // homepage
     var table_idx = 12;
   } else if (path === "/cfp/servlet/event.showcfp") {
@@ -403,6 +454,23 @@ function main() {
   }
   var rows = tables[table_idx].getElementsByTagName("tr");
   parse_table(rows, ggs_data, predatories);
+
+  // Add the GGS iframe
+  document.getElementsByTagName("body")[0].innerHTML += `
+  <div id="ggs-iframe">
+    <div id="ggs-description">
+      Detected acronym: <div id="ggs-acronym"></div>
+      Detected name search: <div id="ggs-name"></div>
+      <a href="#" onclick="toggle_ggs_iframe('', '')"> Hide! </a>
+    </div>
+    <iframe src="https://scie.lcc.uma.es:8443/ratingSearch.jsf">
+    </iframe>
+  </div>
+  `
+  var s = document.createElement('script');
+  s.textContent = String(toggle_ggs_iframe);
+  (document.head || document.documentElement).appendChild(s);
+  s.remove();
 }
 
 main();

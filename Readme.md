@@ -35,21 +35,33 @@ details are available on the [GGS website](https://scie.lcc.uma.es:8443/).
 
 ## 2. Usage
 
+Two columns are added to the list of calls. 
+
+The first shows the GGS score. By clicking on it, the GGS website shows up, as
+well as the detected acronym and search string.
+
+In the second column, two links to SJR and Scholar queries are added.
+
+Each call detected as predatory is dropped with a line.
+
+The above data are also available on the pages of each call.
+
 ### 2.1. `n/a`
 If the `GSS` column is `n/a`, it means that:
 1. the cfp is for a journal
 2. the conference is very bad (not available in GGS)
-3. the conference was not matched by my algorithm
+3. the conference was not matched by my algorithm (this usually does not
+ happen)
 4. the conference is new
 
 ### 2.2. `err`
 If the `GSS` column is `err`, it means that:
 1. the GGS score was malformed (no known cases)
-2. the algorithm has found more than one match for this conference
+2. the algorithm has found more than one match for this conference (rare case)
 
 In any of the above cases, I strongly suggest you to 
-1. check scholar, sjr and GGS rankings via the provided links (you can click
-  the `GGS` table header to go the GGS website)
+1. check Scholar, SJR and GGS rankings via the provided links (you can click
+  the `GGS` score to go the GGS website)
 2. if you do not find the conference/journal on these databases, only publish
   if you really trust the organizers.
 
